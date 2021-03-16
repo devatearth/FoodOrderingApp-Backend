@@ -1,0 +1,5 @@
+FoodOrderingApp-api/target/*
+FoodOrderingApp-db/target/*
+FoodOrderingApp-service/target/*
+FoodOrderingApp-api/src/main/resources/application.properties
+FoodOrderingApp-db/src/main/resources/config/localhost.properties
