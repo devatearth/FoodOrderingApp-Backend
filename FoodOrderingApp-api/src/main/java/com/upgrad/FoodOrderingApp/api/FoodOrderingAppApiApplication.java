@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 @Import(ServiceConfiguration.class)
 public class FoodOrderingAppApiApplication {
     public static void main(String[] args) {
+        System.out.println("********** Starting. Please Wait... **********");
         SpringApplication.run(FoodOrderingAppApiApplication.class, args);
     }
 }
