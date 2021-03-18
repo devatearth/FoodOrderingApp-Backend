@@ -6,6 +6,9 @@ import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "customer_auth")
+@NamedQueries({
+  @NamedQuery(name = "getEntityByToken", query = "SELECT u FROM CustomerAuthEntity u WHERE u.accessToken=:accessToken")
+})
 public class CustomerAuthEntity {
   @Id
   @Column(name = "id")
@@ -36,9 +39,14 @@ public class CustomerAuthEntity {
 
   /* methods */
   public String toString() {
-    String obj = "UserEntity Object {\n";
+    String obj = "CustomerAuthEntity Object {\n";
     obj += "  id: " + this.id + ",\n";
     obj += "  uuid: " + this.uuid + ",\n";
+    obj += "  accessToken: " + this.accessToken + ",\n";
+    obj += "  customerId: " + this.customerId + ",\n";
+    obj += "  loginAt: " + this.loginAt + ",\n";
+    obj += "  logoutAt: " + this.logoutAt + ",\n";
+    obj += "  expiresAt: " + this.expiresAt + ",\n";
     obj += "}";
     return obj;
   }

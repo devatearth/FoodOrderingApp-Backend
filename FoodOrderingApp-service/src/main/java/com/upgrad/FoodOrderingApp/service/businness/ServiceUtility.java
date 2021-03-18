@@ -12,9 +12,11 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.UUID;
 import java.util.HashMap;
+import java.util.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.text.SimpleDateFormat;
 
 @Component
 public class ServiceUtility {
@@ -83,5 +85,26 @@ public class ServiceUtility {
     Pattern special = Pattern.compile("[\\[\\]#@$%&*!^]");
     Matcher hasSpecial = special.matcher(password);
     return (password.length() >= 8) && hasSpecial.find();
+  }
+
+  /* checks to see if a jwt token entry is expired or not based on the 
+     db entry and now timestamp in milliseconds */
+  public boolean checkIfTokenHasExpired(String dateString) {
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    Date date = null;
+
+    try {
+      date = format.parse(dateString);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    if (date.getTime() > System.currentTimeMillis()) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 }

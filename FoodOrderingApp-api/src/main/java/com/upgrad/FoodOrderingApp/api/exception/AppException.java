@@ -14,6 +14,7 @@ import java.util.HashMap;
 /* project imports */
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 
 @ControllerAdvice
 public class AppException {
@@ -27,7 +28,15 @@ public class AppException {
   }
   /* authentication failed */
   @ExceptionHandler(AuthenticationFailedException.class)
-  public ResponseEntity<Map<String, Object>> authFail(AuthenticationFailedException exception, WebRequest request) {
+  public ResponseEntity<Map<String, Object>> authFailExc(AuthenticationFailedException exception, WebRequest request) {
+    Map errorMap = new HashMap();
+    errorMap.put("code", exception.getCode());
+    errorMap.put("message", exception.getErrorMessage());
+    return new ResponseEntity(errorMap, HttpStatus.UNAUTHORIZED);
+  }
+  /* authorization failed */
+  @ExceptionHandler(AuthorizationFailedException.class)
+  public ResponseEntity<Map<String, Object>> authFail(AuthorizationFailedException exception, WebRequest request) {
     Map errorMap = new HashMap();
     errorMap.put("code", exception.getCode());
     errorMap.put("message", exception.getErrorMessage());

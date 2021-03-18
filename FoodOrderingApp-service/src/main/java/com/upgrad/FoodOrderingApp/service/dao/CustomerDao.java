@@ -31,6 +31,18 @@ public class CustomerDao {
     }
   } 
 
+  /* checks to see if a customer auth entity is there based on an access token */
+  public CustomerAuthEntity getCustomerEntityByAccessToken(String jwt) {
+    System.out.println(">_ checking to see if customer auth entity is there or not by token id...");
+    try {
+      return this.entityManager.createNamedQuery("getEntityByToken", CustomerAuthEntity.class)
+             .setParameter("accessToken", jwt).getSingleResult();
+    }
+    catch (NoResultException nRE) {
+      return null;
+    }
+  }
+
   /* creates a new customer instance in the db */
   public void registerNewCustomer(CustomerEntity newCustomer) {
     System.out.println(">_ registering new user in the database...");
@@ -46,5 +58,10 @@ public class CustomerDao {
     authEntity.setAccessToken(jwt);
     authEntity.setUuid(customer.getUuid());
     this.entityManager.persist(authEntity);
+  }
+
+  /* updates the customer auth entity in the 'custsomer_auth' table */
+  public void updateCustomerAuthEntity(CustomerAuthEntity authEntity) {
+    entityManager.merge(authEntity);
   }
 }
