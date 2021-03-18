@@ -13,12 +13,21 @@ import java.util.HashMap;
 
 /* project imports */
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
 
 @ControllerAdvice
 public class AppException {
   /* signup */
   @ExceptionHandler(SignUpRestrictedException.class)
   public ResponseEntity<Map<String, Object>> signup(SignUpRestrictedException exception, WebRequest request) {
+    Map errorMap = new HashMap();
+    errorMap.put("code", exception.getCode());
+    errorMap.put("message", exception.getErrorMessage());
+    return new ResponseEntity(errorMap, HttpStatus.UNAUTHORIZED);
+  }
+  /* authentication failed */
+  @ExceptionHandler(AuthenticationFailedException.class)
+  public ResponseEntity<Map<String, Object>> authFail(AuthenticationFailedException exception, WebRequest request) {
     Map errorMap = new HashMap();
     errorMap.put("code", exception.getCode());
     errorMap.put("message", exception.getErrorMessage());
