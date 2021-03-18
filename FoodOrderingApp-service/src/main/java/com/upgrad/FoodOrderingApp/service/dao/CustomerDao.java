@@ -6,11 +6,13 @@ import org.springframework.stereotype.Repository;
 
 /* project imports */
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
+import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 
 /* java imports */
 import javax.persistence.PersistenceContext;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import java.time.ZonedDateTime;
 
 @Repository
 public class CustomerDao {
@@ -33,5 +35,16 @@ public class CustomerDao {
   public void registerNewCustomer(CustomerEntity newCustomer) {
     System.out.println(">_ registering new user in the database...");
     this.entityManager.persist(newCustomer);
+  }
+
+  /* creates a registry for login in the db */
+  public void registerLoginSession(CustomerEntity customer, String jwt, ZonedDateTime now, ZonedDateTime expiresAt) {
+    CustomerAuthEntity authEntity = new CustomerAuthEntity();
+    authEntity.setExpiresAt(expiresAt);
+    authEntity.setCustomerId(customer.getId());
+    authEntity.setLoginAt(now);
+    authEntity.setAccessToken(jwt);
+    authEntity.setUuid(customer.getUuid());
+    this.entityManager.persist(authEntity);
   }
 }
