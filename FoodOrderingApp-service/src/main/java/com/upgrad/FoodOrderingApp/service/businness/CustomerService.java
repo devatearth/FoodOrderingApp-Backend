@@ -20,6 +20,7 @@ import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 
 @Service
 public class CustomerService {
@@ -113,5 +114,41 @@ public class CustomerService {
         return true;
       }
     }
+  }
+
+  /* performs the necessary processes to validate a particular jwt */
+  public CustomerAuthEntity validateAccessToken(String jwt) 
+  throws AuthorizationFailedException {
+    /*1. lets check if there is a registry in the customer_auth table for this jwt */
+    CustomerAuthEntity customerAuthEntity = customerDao.getCustomerEntityByAccessToken(jwt);
+    System.out.println(customerAuthEntity);
+    /* if null */
+    if (customerAuthEntity == null) {
+      throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
+    }
+    else {
+      ZonedDateTime logoutStamp = customerAuthEntity.getLogoutAt();
+      /* if already logged out */
+      if (logoutStamp != null) {
+        throw new AuthorizationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint.");
+      }
+      else {
+        boolean isJwtValid = serviceUtility.checkIfTokenHasExpired(customerAuthEntity.getExpiresAt().toString());
+        if (!isJwtValid) {
+          customerAuthEntity.setLogoutAt(ZonedDateTime.now());
+          customerDao.updateCustomerAuthEntity(customerAuthEntity);
+          throw new AuthorizationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint.");
+        }
+        else {
+          return customerAuthEntity;
+        }
+      }
+    }
+  }
+
+  /* performs the signout process with the dao */
+  @Transactional
+  public void performSignOutProcess(CustomerAuthEntity authEntity) {
+    customerDao.updateCustomerAuthEntity(authEntity);
   }
 }

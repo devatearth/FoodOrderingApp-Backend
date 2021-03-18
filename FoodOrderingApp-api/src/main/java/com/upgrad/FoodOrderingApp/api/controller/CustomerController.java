@@ -16,14 +16,18 @@ import org.springframework.http.HttpHeaders;
 /* java imports */
 import java.util.Base64;
 import java.util.HashMap;
+import java.time.ZonedDateTime;
 
 /* project imports */
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerRequest;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerResponse;
 import com.upgrad.FoodOrderingApp.api.model.LoginResponse;
+import com.upgrad.FoodOrderingApp.api.model.LogoutResponse;
+import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 
 @RestController
 public class CustomerController {
@@ -104,6 +108,37 @@ public class CustomerController {
       loginResponse.setContactNumber((String) signInResponse.get("contact"));
       /* response */
       return new ResponseEntity(loginResponse, headers, HttpStatus.OK);
+    }
+  }
+
+  @RequestMapping (
+    path = "/customer/logout", 
+    method = RequestMethod.POST, 
+    consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, 
+    produces = MediaType.APPLICATION_JSON_UTF8_VALUE
+  )
+  public ResponseEntity<LogoutResponse> logout(@RequestHeader("authorization") String authorization) 
+  throws AuthorizationFailedException, Exception {
+    /* 1. lets check if the authorization header is in a proper format and then proceed, otherwise throw error */
+    if (authorization.indexOf("Bearer ") == -1) {
+      throw new AuthorizationFailedException("ATH-004", "Bearer not found in the authorizaton header section");
+    }
+    else {
+      /* 2. get the jwt token from the header */
+      String jwt = authorization.split("Bearer ")[1];
+
+      /* 3. validate the access token in the header to proceed */
+      CustomerAuthEntity entity = customerService.validateAccessToken(jwt); 
+        
+      /* perform the logout process with the dao */
+      entity.setLogoutAt(ZonedDateTime.now());
+      customerService.performSignOutProcess(entity);
+
+      /* finally build and send the respopnse to the client side */
+      LogoutResponse logoutResponse = new LogoutResponse();
+      logoutResponse.setId(entity.getUuid());
+      logoutResponse.setMessage("LOGGED OUT SUCCESSFULLY");
+      return new ResponseEntity(logoutResponse, HttpStatus.OK);
     }
   }
 }
