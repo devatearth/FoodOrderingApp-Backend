@@ -174,4 +174,40 @@ public class CustomerService {
       return customer;
     }
   }
+
+  /* peforms validation on the update request for a customer password (old vs new), then will make updates in the db */
+  @Transactional
+  public CustomerEntity updateCustomerPasswordIfValid(Integer customerId, String oldPassword, String newPassword)
+  throws UpdateCustomerException, Exception {
+    /* first fetch the respective customer entity from the db based on the customer id */
+    CustomerEntity customer = customerDao.getCustomerEntityById(customerId);
+
+    /* check to see if the old password field is a falsy value */
+    if (
+      serviceUtility.isStringNullOrEmpty(oldPassword) ||
+      serviceUtility.isStringNullOrEmpty(newPassword)) {
+      throw new UpdateCustomerException("UCR-003", "No field should be empty");
+    }
+    else {
+      /* check to see if the old password is the correct password for the customer entity */
+      String hashedPassword = cryptoProvider.encrypt(oldPassword, customer.getSalt());
+      if (!hashedPassword.equals(customer.getPassword())) {
+        throw new UpdateCustomerException("UCR-004", "Incorrect old password!");
+      }
+      /* validate the strength of the new password */
+      else if (!serviceUtility.isValidAndStrongPassword(newPassword)) {
+        throw new UpdateCustomerException("UCR-001", "Weak password!");
+      }
+      else {
+        /* update the customer entity with the new password details */
+        String[] arrayOfEncryptedString = this.cryptoProvider.encrypt(newPassword);
+        customer.setSalt(arrayOfEncryptedString[0]);
+        customer.setPassword(arrayOfEncryptedString[1]);
+        customerDao.updateCustomerEntity(customer);
+
+        /* finally return the value to the controller with the updated details */
+        return customer;
+      }
+    }
+  }
 }
