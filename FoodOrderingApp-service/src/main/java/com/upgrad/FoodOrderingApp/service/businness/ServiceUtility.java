@@ -107,4 +107,10 @@ public class ServiceUtility {
       return false;
     }
   }
+
+  /* checks to see if the pincode given is valid or not */
+  public boolean isValidPincode(String pincode) {
+    String regex = "\\d+";
+    return (pincode.length() == 6) && pincode.matches(regex);
+  }
 }

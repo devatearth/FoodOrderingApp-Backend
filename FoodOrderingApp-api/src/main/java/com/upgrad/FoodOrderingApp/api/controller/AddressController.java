@@ -19,6 +19,12 @@ import com.upgrad.FoodOrderingApp.service.businness.AddressService;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
 import com.upgrad.FoodOrderingApp.api.model.StatesList;
 import com.upgrad.FoodOrderingApp.api.model.StatesListResponse;
+import com.upgrad.FoodOrderingApp.api.model.SaveAddressRequest;
+import com.upgrad.FoodOrderingApp.api.model.SaveAddressResponse;
+import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
+import com.upgrad.FoodOrderingApp.service.exception.SaveAddressException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.AddressNotFoundException;
 
 /* java imports */
 import java.util.List;
@@ -32,6 +38,41 @@ public class AddressController {
 
   @Autowired
   AddressService addressService;
+
+  /* @CrossOrigin(origins = "http://localhost:8080") */
+  @RequestMapping (
+    path = "/address", 
+    method = RequestMethod.POST, 
+    consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+    produces = MediaType.APPLICATION_JSON_UTF8_VALUE
+  )
+  public ResponseEntity<SaveAddressResponse> saveAddress(
+    @RequestHeader("authorization") String authorization, @RequestBody SaveAddressRequest addressRequest
+  ) throws AuthorizationFailedException, SaveAddressException, Exception {
+    /* 1. lets check if the authorization header is in a proper format and then proceed, otherwise throw error */
+    if (authorization.indexOf("Bearer ") == -1) {
+      throw new AuthorizationFailedException("ATH-004", "Bearer not found in the authorizaton header section");
+    }
+    else {
+      /* 2. get the jwt token from the header */
+      String jwt = authorization.split("Bearer ")[1];
+
+      /* 3. validate the access token in the header to proceed */
+      CustomerAuthEntity entity = customerService.validateAccessToken(jwt); 
+
+      /* 4. validate and create an entry in the database with the service if applicable */
+      String newAddressUuid = addressService.createAddressIfValid(
+        addressRequest.getFlatBuildingName(), addressRequest.getLocality(), addressRequest.getCity(), 
+        addressRequest.getPincode(), addressRequest.getStateUuid()
+      );
+
+      /* finally send the response to the client side */
+      SaveAddressResponse saveAddressResponse = new SaveAddressResponse();
+      saveAddressResponse.setId(newAddressUuid);
+      saveAddressResponse.setStatus("ADDRESS SUCCESSFULLY SAVED");
+      return new ResponseEntity(saveAddressResponse, HttpStatus.OK);
+    }
+  }
 
   /* @CrossOrigin(origins = "http://localhost:8080") */
   @RequestMapping (

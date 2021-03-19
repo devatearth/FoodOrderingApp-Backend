@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 /* project imports */
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
+import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
 
 /* java imports */
 import javax.persistence.PersistenceContext;
@@ -22,5 +23,18 @@ public class AddressDao {
   public List<StateEntity> getAllStates() {
     List<StateEntity> listOfStates = entityManager.createNamedQuery("getAllStates", StateEntity.class).getResultList();
     return listOfStates;
+  }
+  
+  public StateEntity getStateByUuid(String uuid) {
+    try {
+      return entityManager.createNamedQuery("getStateByUuid", StateEntity.class).setParameter("uuid", uuid).getSingleResult();
+    }
+    catch (NoResultException nRE) {
+      return null;
+    }
+  }
+
+  public void createNewAddressEntity(AddressEntity newAddress) {
+    this.entityManager.persist(newAddress);
   }
 }
