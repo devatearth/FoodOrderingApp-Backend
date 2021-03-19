@@ -24,6 +24,9 @@ import com.upgrad.FoodOrderingApp.api.model.SignupCustomerRequest;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerResponse;
 import com.upgrad.FoodOrderingApp.api.model.LoginResponse;
 import com.upgrad.FoodOrderingApp.api.model.LogoutResponse;
+import com.upgrad.FoodOrderingApp.api.model.UpdateCustomerRequest;
+import com.upgrad.FoodOrderingApp.api.model.UpdateCustomerResponse;
+import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
@@ -139,6 +142,39 @@ public class CustomerController {
       logoutResponse.setId(entity.getUuid());
       logoutResponse.setMessage("LOGGED OUT SUCCESSFULLY");
       return new ResponseEntity(logoutResponse, HttpStatus.OK);
+    }
+  }
+  
+  @RequestMapping (
+    path = "/customer", 
+    method = RequestMethod.PUT, 
+    consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, 
+    produces = MediaType.APPLICATION_JSON_UTF8_VALUE
+  )
+  public ResponseEntity<UpdateCustomerResponse> update(
+    @RequestHeader("authorization") String authorization, @RequestBody UpdateCustomerRequest updateRequest
+  ) throws AuthorizationFailedException, Exception {
+    /* 1. lets check if the authorization header is in a proper format and then proceed, otherwise throw error */
+    if (authorization.indexOf("Bearer ") == -1) {
+      throw new AuthorizationFailedException("ATH-004", "Bearer not found in the authorizaton header section");
+    }
+    else {
+      /* 2. get the jwt token from the header */
+      String jwt = authorization.split("Bearer ")[1];
+
+      /* 3. validate the access token in the header to proceed */
+      CustomerAuthEntity entity = customerService.validateAccessToken(jwt); 
+
+      /* 4. validate and if valid, then make the necessary update in the customer table in the db */
+      CustomerEntity updatedCustomer = customerService.updateCustomerInfoIfValid(entity.getCustomerId(), updateRequest.getFirstName(), updateRequest.getLastName());
+        
+      /* 5. finally build and send the details to the client side */
+      UpdateCustomerResponse updateCustomerResponse = new UpdateCustomerResponse();
+      updateCustomerResponse.setId(updatedCustomer.getUuid());
+      updateCustomerResponse.setStatus("CUSTOMER DETAILS UPDATED SUCCESSFULLY");
+      updateCustomerResponse.setFirstName(updatedCustomer.getFirstName());
+      updateCustomerResponse.setLastName(updatedCustomer.getLastName());
+      return new ResponseEntity(updateCustomerResponse, HttpStatus.OK);
     }
   }
 }
