@@ -21,6 +21,7 @@ import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.UpdateCustomerException;
 
 @Service
 public class CustomerService {
@@ -89,10 +90,10 @@ public class CustomerService {
 
     /* only last name is optional */
     if (
-      !serviceUtility.isStringNullOrEmpty(firstName) ||
-      !serviceUtility.isStringNullOrEmpty(email) || 
-      !serviceUtility.isStringNullOrEmpty(contact) || 
-      !serviceUtility.isStringNullOrEmpty(password)
+      serviceUtility.isStringNullOrEmpty(firstName) ||
+      serviceUtility.isStringNullOrEmpty(email) || 
+      serviceUtility.isStringNullOrEmpty(contact) || 
+      serviceUtility.isStringNullOrEmpty(password)
     ) {
       throw new SignUpRestrictedException("SGR-005", "Except last name all fields should be filled");
     }
@@ -150,5 +151,27 @@ public class CustomerService {
   @Transactional
   public void performSignOutProcess(CustomerAuthEntity authEntity) {
     customerDao.updateCustomerAuthEntity(authEntity);
+  }
+
+  /* performs validation on the update request for a customer and then if its valid, then will make updates in the db */
+  @Transactional
+  public CustomerEntity updateCustomerInfoIfValid(Integer customerId, String firstName, String lastName) 
+  throws UpdateCustomerException, Exception {
+    /* check if the first name is given otherwise throw error */
+    if (serviceUtility.isStringNullOrEmpty(firstName)) {
+      throw new UpdateCustomerException("UCR-002", "First name field should not be empty");
+    }
+    else {
+      /* here it means we're ok, now fetch the current customer entity from the db from customer table */
+      CustomerEntity customer = customerDao.getCustomerEntityById(customerId);
+      
+      /* update the details for the current customer entity and then push the request to the dao for the update */
+      customer.setFirstName(firstName);
+      customer.setLastName(lastName);
+      customerDao.updateCustomerEntity(customer);
+
+      /* finally send the updated customer details to the controller */
+      return customer;
+    }
   }
 }

@@ -25,7 +25,7 @@ public class ServiceUtility {
 
   /* is null or empty helper function */
   public boolean isStringNullOrEmpty(String string) {
-    if (string != null && !string.isEmpty()) {
+    if (string == null || string.isEmpty()) {
       return true;
     }
     else {
