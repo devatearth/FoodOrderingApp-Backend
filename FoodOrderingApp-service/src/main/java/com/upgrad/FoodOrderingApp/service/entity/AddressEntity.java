@@ -1,18 +1,26 @@
 package com.upgrad.FoodOrderingApp.service.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "address")
+@NamedQueries({
+  @NamedQuery(name = "selectAllAddresses", query = "SELECT u FROM AddressEntity u")
+})
 public class AddressEntity {
   @Id
   @Column(name = "id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private int id;
 
-  @Column(name = "state_id")
-  private int stateId;
+  @ManyToOne
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "state_id")
+  private StateEntity state;
 
   @Column(name = "active")
   private int active;
@@ -51,8 +59,8 @@ public class AddressEntity {
   public int getActive() {
     return this.active;
   }
-  public int getStateId() {
-    return this.stateId;
+  public StateEntity getState() {
+    return this.state;
   }
   public int getId() {
     return this.id;
@@ -75,8 +83,8 @@ public class AddressEntity {
   public void setActive(int active) {
     this.active = active;
   }
-  public void setStateId(int stateId) {
-    this.stateId = stateId;
+  public void setState(StateEntity state) {
+    this.state = state;
   }
   public void setId(int id) {
     this.id = id;
@@ -84,7 +92,7 @@ public class AddressEntity {
   public String toString() {
     String obj = "AddressEntity Object {\n";
     obj += "  id: " + this.id + ",\n";
-    obj += "  stateId: " + this.stateId + ",\n";
+    obj += "  state: " + this.state + ",\n";
     obj += "  active: " + this.active + ",\n";
     obj += "  locality: " + this.locality + ",\n";
     obj += "  city: " + this.city + ",\n";

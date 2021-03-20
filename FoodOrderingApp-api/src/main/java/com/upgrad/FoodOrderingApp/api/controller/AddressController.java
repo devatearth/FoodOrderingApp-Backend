@@ -17,10 +17,14 @@ import org.springframework.http.HttpHeaders;
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
 import com.upgrad.FoodOrderingApp.service.businness.AddressService;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
+import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
 import com.upgrad.FoodOrderingApp.api.model.StatesList;
 import com.upgrad.FoodOrderingApp.api.model.StatesListResponse;
 import com.upgrad.FoodOrderingApp.api.model.SaveAddressRequest;
 import com.upgrad.FoodOrderingApp.api.model.SaveAddressResponse;
+import com.upgrad.FoodOrderingApp.api.model.AddressListResponse;
+import com.upgrad.FoodOrderingApp.api.model.AddressList;
+import com.upgrad.FoodOrderingApp.api.model.AddressListState;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.exception.SaveAddressException;
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
@@ -71,6 +75,54 @@ public class AddressController {
       saveAddressResponse.setId(newAddressUuid);
       saveAddressResponse.setStatus("ADDRESS SUCCESSFULLY SAVED");
       return new ResponseEntity(saveAddressResponse, HttpStatus.OK);
+    }
+  }
+  
+  /* @CrossOrigin(origins = "http://localhost:8080") */
+  @RequestMapping (
+    path = "/address/customer", 
+    method = RequestMethod.GET, 
+    produces = MediaType.APPLICATION_JSON_UTF8_VALUE
+  )
+  public ResponseEntity<AddressListResponse> getAllAddresses(@RequestHeader("authorization") String authorization) 
+  throws AuthorizationFailedException, Exception {
+    /* 1. lets check if the authorization header is in a proper format and then proceed, otherwise throw error */
+    if (authorization.indexOf("Bearer ") == -1) {
+      throw new AuthorizationFailedException("ATH-004", "Bearer not found in the authorizaton header section");
+    }
+    else {
+      /* 2. get the jwt token from the header */
+      String jwt = authorization.split("Bearer ")[1];
+
+      /* 3. validate the access token in the header to proceed */
+      CustomerAuthEntity entity = customerService.validateAccessToken(jwt); 
+
+      /* 4. fetch all the addresses that are saved in the db */
+      List<AddressEntity> listOfAddresses = addressService.getAllAddresses();
+
+      /* 5. build the required response */
+      AddressListResponse addressListResponse = new AddressListResponse();
+      for (AddressEntity address : listOfAddresses) {
+        /* set the state */
+        AddressListState state = new AddressListState();
+        state.setStateName(address.getState().getStateName());
+        state.setId(UUID.fromString(address.getState().getUuid()));
+
+        /* set the address */
+        AddressList addressItem = new AddressList();
+        addressItem.setId(UUID.fromString(address.getUuid()));
+        addressItem.setFlatBuildingName(address.getFlatBuildingNumber());
+        addressItem.setLocality(address.getLocality());
+        addressItem.setCity(address.getCity());
+        addressItem.setPincode(address.getPincode());
+        addressItem.setState(state);
+
+        /* add to the list response */
+        addressListResponse.addAddressesItem(addressItem);
+      }
+
+      /* 6. finally send the details to the client side */
+      return new ResponseEntity(addressListResponse, HttpStatus.OK);
     }
   }
 

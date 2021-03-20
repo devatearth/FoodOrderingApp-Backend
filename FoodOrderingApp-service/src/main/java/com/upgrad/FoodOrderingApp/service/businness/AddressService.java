@@ -30,6 +30,11 @@ public class AddressService {
     return addressDao.getAllStates();
   }
 
+  /* helps to fetch all the address through the address dao handler */
+  public List<AddressEntity> getAllAddresses() {
+    return addressDao.getAllAddresses();
+  }
+
   /* validates the details of the address being sent and if ok, will help insert them in the db */
   @Transactional
   public String createAddressIfValid(String building, String locality, String city, String pincode, String stateUuid) 
@@ -63,7 +68,7 @@ public class AddressService {
         newAddress.setCity(city);
         newAddress.setPincode(pincode);
         newAddress.setUuid(addressUuid);
-        newAddress.setStateId(state.getId());
+        newAddress.setState(state);
 
         /* make the request */
         addressDao.createNewAddressEntity(newAddress);
