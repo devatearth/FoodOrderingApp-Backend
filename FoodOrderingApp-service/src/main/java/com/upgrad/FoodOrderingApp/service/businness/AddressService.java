@@ -7,9 +7,13 @@ import org.springframework.stereotype.Service;
 /* project imports */
 import com.upgrad.FoodOrderingApp.service.dao.CustomerDao;
 import com.upgrad.FoodOrderingApp.service.dao.AddressDao;
+import com.upgrad.FoodOrderingApp.service.dao.CustomerAddressDao;
+import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
 import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
+import com.upgrad.FoodOrderingApp.service.entity.CustomerAddressEntity;
 import com.upgrad.FoodOrderingApp.service.exception.SaveAddressException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.AddressNotFoundException;
 
 /* java imports */
@@ -23,7 +27,13 @@ public class AddressService {
   AddressDao addressDao;
 
   @Autowired
+  CustomerDao customerDao;
+
+  @Autowired
   ServiceUtility serviceUtility;
+  
+  @Autowired
+  CustomerAddressDao customerAddressDao;
 
   /* connects with the dao to fetch all states from the db */
   public List<StateEntity> getAllStates() {
@@ -37,7 +47,7 @@ public class AddressService {
 
   /* validates the details of the address being sent and if ok, will help insert them in the db */
   @Transactional
-  public String createAddressIfValid(String building, String locality, String city, String pincode, String stateUuid) 
+  public String createAddressIfValid(String building, String locality, String city, String pincode, String stateUuid, int customerId) 
   throws SaveAddressException, Exception {
     if (
       serviceUtility.isStringNullOrEmpty(building) ||
@@ -73,8 +83,45 @@ public class AddressService {
         /* make the request */
         addressDao.createNewAddressEntity(newAddress);
 
+        /* get customer entity by id */
+        CustomerEntity customer = customerDao.getCustomerEntityById(customerId);
+
+        /* create a customer address entity */
+        CustomerAddressEntity customerAddressEntity = new CustomerAddressEntity();
+        customerAddressEntity.setCustomerEntity(customer);
+        customerAddressEntity.setAddressEntity(newAddress);
+
+        /* set entry in the customer_address table */
+        customerAddressDao.createNewCustomerAddressEntry(customerAddressEntity);
+
         /* return value to the controller */
         return addressUuid;
+      }
+    }
+  }
+
+  /* validates the detalils for the address to be deleted and if ok, will perform the delete action */
+  @Transactional
+  public String deleteAddressIfValid(String addressId, int customerId) throws AddressNotFoundException, Exception {
+    if (serviceUtility.isStringNullOrEmpty(addressId)) {
+      throw new AddressNotFoundException("ANF-005", "Address id can not be empty");
+    }
+    else {
+      AddressEntity addressEntity = addressDao.getAddressByUuid(addressId);
+      if (addressEntity == null) {
+        throw new AddressNotFoundException("ANF-003", "No address by this id");
+      }
+      else {
+        CustomerAddressEntity customerAddressEntity = customerAddressDao.getEntityByAddressId(addressEntity.getId());
+
+        int customerIdFromCustomerAddressEntity = customerAddressEntity.getCustomerEntity().getId();
+        if (customerIdFromCustomerAddressEntity != customerId) {
+          throw new AuthorizationFailedException("ATHR-004", "You are not authorized to view/update/delete any one else's address ");
+        }
+        else {
+          addressDao.deleteAddressEntityByUuid(addressId);
+          return addressId;
+        }
       }
     }
   }

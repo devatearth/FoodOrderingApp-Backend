@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /* project imports */
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
@@ -23,6 +24,7 @@ import com.upgrad.FoodOrderingApp.api.model.StatesListResponse;
 import com.upgrad.FoodOrderingApp.api.model.SaveAddressRequest;
 import com.upgrad.FoodOrderingApp.api.model.SaveAddressResponse;
 import com.upgrad.FoodOrderingApp.api.model.AddressListResponse;
+import com.upgrad.FoodOrderingApp.api.model.DeleteAddressResponse;
 import com.upgrad.FoodOrderingApp.api.model.AddressList;
 import com.upgrad.FoodOrderingApp.api.model.AddressListState;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
@@ -67,7 +69,7 @@ public class AddressController {
       /* 4. validate and create an entry in the database with the service if applicable */
       String newAddressUuid = addressService.createAddressIfValid(
         addressRequest.getFlatBuildingName(), addressRequest.getLocality(), addressRequest.getCity(), 
-        addressRequest.getPincode(), addressRequest.getStateUuid()
+        addressRequest.getPincode(), addressRequest.getStateUuid(), entity.getCustomerId()
       );
 
       /* finally send the response to the client side */
@@ -75,6 +77,37 @@ public class AddressController {
       saveAddressResponse.setId(newAddressUuid);
       saveAddressResponse.setStatus("ADDRESS SUCCESSFULLY SAVED");
       return new ResponseEntity(saveAddressResponse, HttpStatus.OK);
+    }
+  }
+  
+  /* @CrossOrigin(origins = "http://localhost:8080") */
+  @RequestMapping (
+    path = "/address/delete/{address_id}", 
+    method = RequestMethod.DELETE, 
+    produces = MediaType.APPLICATION_JSON_UTF8_VALUE
+  )
+  public ResponseEntity<SaveAddressResponse> deleteAddress(
+  @RequestHeader("authorization") String authorization, @PathVariable("address_id") String addressId) 
+  throws AuthorizationFailedException, AddressNotFoundException, Exception {
+    /* 1. lets check if the authorization header is in a proper format and then proceed, otherwise throw error */
+    if (authorization.indexOf("Bearer ") == -1) {
+      throw new AuthorizationFailedException("ATH-004", "Bearer not found in the authorizaton header section");
+    }
+    else {
+      /* 2. get the jwt token from the header */
+      String jwt = authorization.split("Bearer ")[1];
+
+      /* 3. validate the access token in the header to proceed */
+      CustomerAuthEntity entity = customerService.validateAccessToken(jwt); 
+
+      /* 4. perform the necessary delete action if all details are valid */
+      String deletedUUID = addressService.deleteAddressIfValid(addressId, entity.getCustomerId());
+
+      /* 5. finally build the required response to be sent to the client side */
+      DeleteAddressResponse deleteResponse = new DeleteAddressResponse();
+      deleteResponse.setId(UUID.fromString(deletedUUID));
+      deleteResponse.setStatus("ADDRESS DELETED SUCCESSFULLY");
+      return new ResponseEntity(deleteResponse, HttpStatus.OK);
     }
   }
   
