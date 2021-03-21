@@ -1,0 +1,21 @@
+{
+  "name": "foodorderingappbackend-stub",
+  "version": "1.0.0",
+  "description": "upgrad backend project for the food order application",
+  "main": "index.js",
+  "scripts": {
+    "start": "mvn spring-boot:run -Dmaven.test.skip",
+    "clean": "mvn clean install -Dmaven.test.skip",
+    "install": "mvn clean install -Psetup -Dmaven.test.skip"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sricharankrishnan/FoodOrderingApp-Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sricharankrishnan/FoodOrderingApp-Backend/issues"
+  },
+  "homepage": "https://github.com/sricharankrishnan/FoodOrderingApp-Backend#readme"
+}
