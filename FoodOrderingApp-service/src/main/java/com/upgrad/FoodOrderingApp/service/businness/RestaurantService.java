@@ -82,4 +82,52 @@ If error throws exception with error code and error message.
         return restaurantEntities;
     }
 
+
+    public RestaurantEntity restaurantByUUID(String uuid) throws RestaurantNotFoundException {
+        if (uuid == null || uuid == "") { //Checking for restaurantUuid to be null or empty to throw exception.
+            throw new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty");
+        }
+        RestaurantEntity restaurant = restaurantDao.restaurantByUUID(uuid);
+        if (restaurant == null) {
+            throw new RestaurantNotFoundException("RNF-001", "No restaurant by this id");
+        }
+        return restaurant;
+    }
+
+    /* This method is to update Restaurant Rating and returns updated RestaurantEntity. its takes restaurantEntity and customerRating as the input.
+    If error throws exception with error code and error message.
+    */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public RestaurantEntity updateRestaurantRating(RestaurantEntity restaurantEntity, Double customerRating) throws AuthorizationFailedException, InvalidRatingException, RestaurantNotFoundException {
+        if (!isValidCustomerRating(customerRating.toString())) { //Checking for the rating to be valid
+            throw new InvalidRatingException("IRE-001", "Restaurant should be in the range of 1 to 5");
+        }
+        //Finding the new Customer rating adn updating it.
+        DecimalFormat format = new DecimalFormat("##.0"); //keeping format to one decimal
+        double restaurantRating = restaurantEntity.getCustomerRating();
+        Integer restaurantNoOfCustomerRated = restaurantEntity.getNumberOfCustomersRated();
+        restaurantEntity.setNumberOfCustomersRated(restaurantNoOfCustomerRated + 1);
+
+        //calculating the new customer rating as per the given data and formula
+        double newCustomerRating = (restaurantRating * (restaurantNoOfCustomerRated.doubleValue()) + customerRating) / restaurantEntity.getNumberOfCustomersRated();
+
+        restaurantEntity.setCustomerRating(Double.parseDouble(format.format(newCustomerRating)));
+
+        //Updating the restautant in the db using the method updateRestaurantRating of restaurantDao.
+        RestaurantEntity updatedRestaurantEntity = restaurantDao.updateRestaurantRating(restaurantEntity);
+
+        return updatedRestaurantEntity;
+
+    }
+
+    //To validate the Customer rating
+    public boolean isValidCustomerRating(String cutomerRating) {
+        if (cutomerRating.equals("5.0")) {
+            return true;
+        }
+        Pattern p = Pattern.compile("[1-4].[0-9]");
+        Matcher m = p.matcher(cutomerRating);
+        return (m.find() && m.group().equals(cutomerRating));
+    }
+
 }
