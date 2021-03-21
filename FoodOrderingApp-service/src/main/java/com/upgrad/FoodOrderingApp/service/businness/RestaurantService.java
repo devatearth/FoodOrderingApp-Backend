@@ -55,5 +55,31 @@ If error throws exception with error code and error message.
         List<RestaurantEntity> restaurantEntities = restaurantDao.restaurantsByName(restaurantName);
         return restaurantEntities;
     }
+    /* This method is to get restaurant By Category and returns list of RestaurantEntity. its takes categoryId as the input string.
+If error throws exception with error code and error message.
+*/
+    public List<RestaurantEntity> restaurantByCategory(String categoryId) throws CategoryNotFoundException {
+
+        if (categoryId == null || categoryId == "") { //Checking for categoryId to be null or empty to throw exception.
+            throw new CategoryNotFoundException("CNF-001", "Category id field should not be empty");
+        }
+
+        //Calls getCategoryByUuid of categoryDao to get list of CategoryEntity
+        CategoryEntity categoryEntity = categoryDao.getCategoryByUuid(categoryId);
+
+        if (categoryEntity == null) {//Checking for categoryEntity to be null or empty to throw exception.
+            throw new CategoryNotFoundException("CNF-002", "No category by this id");
+        }
+
+        //Calls getRestaurantByCategory of restaurantCategoryDao to get list of RestaurantCategoryEntity
+        List<RestaurantCategoryEntity> restaurantCategoryEntities = restaurantCategoryDao.getRestaurantByCategory(categoryEntity);
+
+        //Creating new restaurantEntity List and add only the restaurant for the corresponding category.
+        List<RestaurantEntity> restaurantEntities = new LinkedList<>();
+        restaurantCategoryEntities.forEach(restaurantCategoryEntity -> {
+            restaurantEntities.add(restaurantCategoryEntity.getRestaurantId());
+        });
+        return restaurantEntities;
+    }
 
 }
