@@ -43,4 +43,10 @@ public class CategoryService {
         return categoryEntities;
     }
 
+    public List<CategoryEntity> getAllCategories() {
+
+        //Calls all getCategories
+        List<CategoryEntity> categoryEntities = restaurantCategoryDao.getAllCategories();
+        return categoryEntities;
+    }
 }
