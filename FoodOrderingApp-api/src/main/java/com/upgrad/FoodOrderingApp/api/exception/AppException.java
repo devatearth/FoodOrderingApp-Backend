@@ -1,6 +1,7 @@
 package com.upgrad.FoodOrderingApp.api.exception;
 
 /* spring imports */
+import com.upgrad.FoodOrderingApp.service.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,12 +13,6 @@ import java.util.Map;
 import java.util.HashMap;
 
 /* project imports */
-import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
-import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
-import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
-import com.upgrad.FoodOrderingApp.service.exception.UpdateCustomerException;
-import com.upgrad.FoodOrderingApp.service.exception.SaveAddressException;
-import com.upgrad.FoodOrderingApp.service.exception.AddressNotFoundException;
 
 @ControllerAdvice
 public class AppException {
@@ -68,5 +63,13 @@ public class AppException {
     errorMap.put("code", exception.getCode());
     errorMap.put("message", exception.getErrorMessage());
     return new ResponseEntity(errorMap, HttpStatus.UNAUTHORIZED);
+  }
+  /* restaurant not found */
+  @ExceptionHandler(RestaurantNotFoundException.class)
+  public ResponseEntity<Map<String, Object>> restaurantNotFound(RestaurantNotFoundException exception, WebRequest request) {
+    Map errorMap = new HashMap();
+    errorMap.put("code", exception.getCode());
+    errorMap.put("message", exception.getErrorMessage());
+    return new ResponseEntity(errorMap, HttpStatus.NOT_FOUND);
   }
 }
