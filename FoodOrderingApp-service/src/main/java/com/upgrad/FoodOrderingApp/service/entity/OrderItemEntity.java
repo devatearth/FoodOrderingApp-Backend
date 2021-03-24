@@ -67,5 +67,4 @@ public class OrderItemEntity implements Serializable {
     public void setPrice(Integer price) {
         this.price = price;
     }
-
 }

@@ -72,6 +72,16 @@ public class CustomerDao {
     this.entityManager.persist(authEntity);
   }
 
+  //To get customer details by Uuid
+  public CustomerEntity getCustomerByUuid(String customerUuid) {
+    try {
+      CustomerEntity customer = entityManager.createNamedQuery("userByUuid", CustomerEntity.class).setParameter("uuid", customerUuid).getSingleResult();
+      return customer;
+    } catch (NoResultException nre) {
+      return null;
+    }
+  }
+
   /* updates the customer auth entity in the 'custsomer_auth' table */
   public void updateCustomerAuthEntity(CustomerAuthEntity authEntity) {
     entityManager.merge(authEntity);

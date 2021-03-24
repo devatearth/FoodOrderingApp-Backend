@@ -1,17 +1,10 @@
 package com.upgrad.FoodOrderingApp.service.businness;
 
-import com.upgrad.FoodOrderingApp.service.dao.CouponDao;
-import com.upgrad.FoodOrderingApp.service.dao.CustomerDao;
-<<<<<<< HEAD
-import com.upgrad.FoodOrderingApp.service.entity.CouponEntity;
-=======
-import com.upgrad.FoodOrderingApp.service.dao.OrderDao;
-import com.upgrad.FoodOrderingApp.service.dao.OrderItemDao;
+import com.upgrad.FoodOrderingApp.service.dao.*;
 import com.upgrad.FoodOrderingApp.service.entity.CouponEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import com.upgrad.FoodOrderingApp.service.entity.OrderEntity;
 import com.upgrad.FoodOrderingApp.service.entity.OrderItemEntity;
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.CouponNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-<<<<<<< HEAD
-=======
 import java.util.List;
 
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
 @Service
 public class OrderService {
 
@@ -33,15 +23,21 @@ public class OrderService {
     @Autowired
     CouponDao couponDao;
 
-<<<<<<< HEAD
-=======
     @Autowired
     OrderDao orderDao;
 
     @Autowired
     OrderItemDao orderItemDao;
 
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
+    @Autowired
+    AddressDao addressDao;
+
+    @Autowired
+    PaymentDao paymentDao;
+
+    @Autowired
+    CustomerAddressDao customerAddressDao;
+
     //getCouponByCouponName API to fetch coupon details from coupon table.
     @Transactional(propagation = Propagation.REQUIRED)
     public CouponEntity getCouponByCouponName(final String couponName) throws AuthorizationFailedException,
@@ -56,8 +52,16 @@ public class OrderService {
         return couponEntity;
     }
 
-<<<<<<< HEAD
-=======
+    //get Coupon through Coupon UUID
+    @Transactional(propagation = Propagation.REQUIRED)
+    public CouponEntity getCouponByCouponId(final String couponUuid) throws CouponNotFoundException {
+        CouponEntity couponEntity = couponDao.getCouponByUUID(couponUuid);
+        if(couponEntity == null) {
+            throw new CouponNotFoundException("CPF-002", "No coupon by this id");
+        }
+        return couponEntity;
+    }
+
     //get Orders By customerUUID
     @Transactional(propagation = Propagation.REQUIRED)
     public List<OrderEntity> getOrdersByCustomers(String customerUuid){
@@ -74,5 +78,17 @@ public class OrderService {
         return orderItemEntities;
     }
 
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
+    //Save Order in Database
+    @Transactional(propagation = Propagation.REQUIRED)
+    public OrderEntity saveOrder(OrderEntity orderEntity) {
+        return orderDao.saveOrder(orderEntity);
+    }
+
+    //Save Order Item
+    @Transactional(propagation = Propagation.REQUIRED)
+    public OrderItemEntity saveOrderItem(OrderItemEntity orderedItem) {
+        return orderDao.saveOrderItem(orderedItem);
+    }
+
+
 }

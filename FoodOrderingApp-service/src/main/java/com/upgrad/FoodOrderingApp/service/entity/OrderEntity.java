@@ -48,6 +48,10 @@ public class OrderEntity implements Serializable {
     @NotNull
     private AddressEntity address;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "PAYMENT_ID")
+    private PaymentEntity payment;
+
     public OrderEntity() {
 
     }
@@ -127,4 +131,11 @@ public class OrderEntity implements Serializable {
         this.address = address;
     }
 
+    public PaymentEntity getPayment() {
+        return payment;
+    }
+
+    public void setPayment(PaymentEntity payment) {
+        this.payment = payment;
+    }
 }

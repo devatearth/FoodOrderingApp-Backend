@@ -1,33 +1,20 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
-<<<<<<< HEAD
-import com.upgrad.FoodOrderingApp.api.model.CouponDetailsResponse;
-import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
-import com.upgrad.FoodOrderingApp.service.businness.OrderService;
-import com.upgrad.FoodOrderingApp.service.entity.CouponEntity;
-import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
-=======
 import com.upgrad.FoodOrderingApp.api.model.*;
+import com.upgrad.FoodOrderingApp.service.businness.AddressService;
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
 import com.upgrad.FoodOrderingApp.service.businness.OrderService;
+import com.upgrad.FoodOrderingApp.service.businness.PaymentService;
 import com.upgrad.FoodOrderingApp.service.entity.*;
-import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
-import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
-import com.upgrad.FoodOrderingApp.service.exception.CouponNotFoundException;
+import com.upgrad.FoodOrderingApp.service.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-<<<<<<< HEAD
-=======
 import java.math.BigDecimal;
-import java.util.LinkedList;
-import java.util.List;
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("")
@@ -39,6 +26,12 @@ public class OrderController {
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private AddressService addressService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     //getCouponByCouponName method to get the details of a coupon.
     @RequestMapping(
@@ -52,12 +45,7 @@ public class OrderController {
         //Access the accessToken from the request Header
         if (authorization.indexOf("Bearer ") == -1) {
             throw new AuthorizationFailedException("ATH-004", "Bearer not found in the authorization header section");
-<<<<<<< HEAD
-        }
-        else {
-=======
         } else {
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
             //get the jwt token from the header
             String jwt = authorization.split("Bearer ")[1];
 
@@ -65,11 +53,7 @@ public class OrderController {
             CustomerAuthEntity entity = customerService.validateAccessToken(jwt);
 
             //Calls getCouponByCouponName of orderService to get the coupon by name from DB
-<<<<<<< HEAD
-            CouponEntity couponEntity =  orderService.getCouponByCouponName(couponName);
-=======
             CouponEntity couponEntity = orderService.getCouponByCouponName(couponName);
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
 
             //Creating the couponDetailsResponse containing UUID,Coupon Name and percentage.
             CouponDetailsResponse couponDetailsResponse = new CouponDetailsResponse()
@@ -81,8 +65,6 @@ public class OrderController {
 
         }
     }
-<<<<<<< HEAD
-=======
 
     //getPastOrdersOfUser method to get the Customer Past Order details
     @RequestMapping(
@@ -156,5 +138,85 @@ public class OrderController {
             }
         }
     }
->>>>>>> fe3f7b42bd14fb5fc6d11897f731c334285183e7
+
+    /* The method handles save Order request.It takes authorization from the header and other details in SaveOrderRequest.
+        & produces response in SaveOrderResponse and returns UUID and successful message and if error returns error code and error Message.
+        */
+    @RequestMapping(method = RequestMethod.POST, path = "/order", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<SaveOrderResponse> saveOrder(@RequestHeader("authorization") final String authorization,
+                                                       @RequestBody(required = false) final SaveOrderRequest saveOrderRequest)
+            throws AuthorizationFailedException, CouponNotFoundException, AddressNotFoundException,
+            PaymentMethodNotFoundException, RestaurantNotFoundException, ItemNotFoundException {
+
+        //Access the accessToken from the request Header
+        if (authorization.indexOf("Bearer ") == -1) {
+            throw new AuthorizationFailedException("ATH-004", "Bearer not found in the authorization header section");
+        } else {
+            //get the jwt token from the header
+            String jwt = authorization.split("Bearer ")[1];
+
+            //validate the access token in the header to proceed
+            CustomerAuthEntity entity = customerService.validateAccessToken(jwt);
+
+            OrderEntity orderEntity = new OrderEntity();
+            orderEntity.setUuid(UUID.randomUUID().toString());
+            orderEntity.setBill(saveOrderRequest.getBill().doubleValue());
+            orderEntity.setDate(new Date());
+            orderEntity.setCustomer(entity);
+            String couponUuid = saveOrderRequest.getCouponId().toString();
+            if (couponUuid != null) {
+                CouponEntity couponEntity = orderService.getCouponByCouponId(couponUuid);
+                orderEntity.setCoupon(couponEntity);
+            } else {
+                orderEntity.setCoupon(null);
+            }
+            BigDecimal discount = saveOrderRequest.getDiscount();
+            if (discount != null) {
+                orderEntity.setDiscount(discount.doubleValue());
+            } else {
+                orderEntity.setDiscount(BigDecimal.ZERO.doubleValue());
+            }
+
+            String paymentUuid = saveOrderRequest.getPaymentId().toString();
+            if (paymentUuid != null) {
+                PaymentEntity paymentEntity = paymentService.getPaymentByUUID(paymentUuid);
+                orderEntity.setPayment(paymentEntity);
+            } else {
+                orderEntity.setPayment(null);
+            }
+
+            String addressUuid = saveOrderRequest.getAddressId();
+
+        /*AddressEntity addressEntity = addressService.getAddressByUuid(addressUuid, entity);
+        orderEntity.setAddress(addressEntity);*/
+
+            String restaurantUuid = saveOrderRequest.getRestaurantId().toString();
+
+        /*RestaurantEntity restaurantEntity = restaurantService.restaurantByUUID(restaurantUuid);
+        orderEntity.setRestaurant(restaurantEntity);*/
+
+            List<ItemQuantity> itemList = saveOrderRequest.getItemQuantities();
+
+            List<OrderItemEntity> orderItemEntityList = new ArrayList<>();
+
+            OrderEntity savedOrderEntity = orderService.saveOrder(orderEntity);
+
+        /*for(ItemQuantity itemQuantity: itemList) {
+            OrderItemEntity orderedItem = new OrderItemEntity();
+            ItemEntity itemEntity = itemService.getItemByUuid(itemQuantity.getItemId().toString());
+            orderedItem.setItem(itemEntity);
+            orderedItem.setOrder(savedOrderEntity);
+            orderedItem.setQuantity(itemQuantity.getQuantity());
+            orderedItem.setPrice(itemQuantity.getPrice());
+            orderItemEntityList.add(orderedItem);
+            orderService.saveOrderItem(orderedItem);
+        }*/
+
+            //Creating the SaveOrderResponse for the endpoint containing UUID and success message.
+            SaveOrderResponse saveOrderResponse = new SaveOrderResponse().id(savedOrderEntity.getUuid())
+                    .status("ORDER SUCCESSFULLY PLACED");
+            return new ResponseEntity<SaveOrderResponse>(saveOrderResponse, HttpStatus.CREATED);
+        }
+    }
 }

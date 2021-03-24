@@ -1,5 +1,4 @@
 package com.upgrad.FoodOrderingApp.service.dao;
-
 import com.upgrad.FoodOrderingApp.service.entity.OrderEntity;
 import com.upgrad.FoodOrderingApp.service.entity.OrderItemEntity;
 import org.springframework.stereotype.Repository;
@@ -35,4 +34,3 @@ public class OrderItemDao {
         }
     }
 }
-
