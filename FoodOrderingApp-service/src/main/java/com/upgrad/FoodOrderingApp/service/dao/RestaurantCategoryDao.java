@@ -38,4 +38,15 @@ public class RestaurantCategoryDao {
             return null;
         }
     }
+
+    //To get the list of all available category
+    public List<CategoryEntity> getAllCategories() {
+        try {
+            List<CategoryEntity> categoryEntities = entityManager.createNamedQuery("getAllCategoriesOrderedByName", CategoryEntity.class).getResultList();
+            return categoryEntities;
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
 }
