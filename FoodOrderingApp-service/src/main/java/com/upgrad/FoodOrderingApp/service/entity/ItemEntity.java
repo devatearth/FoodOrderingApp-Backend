@@ -1,6 +1,7 @@
 package com.upgrad.FoodOrderingApp.service.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.UUID;
 
@@ -15,6 +16,9 @@ public class ItemEntity {
     @Column(name = "uuid")
     @Size(max = 200)
     private UUID uuid;
+
+
+
 
     @Column(name = "item_name")
     @Size(max = 200)
@@ -66,4 +70,6 @@ public class ItemEntity {
     public void setType(String type) {
         this.type = type;
     }
+
+
 }
