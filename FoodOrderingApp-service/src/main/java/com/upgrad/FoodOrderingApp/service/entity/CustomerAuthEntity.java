@@ -9,7 +9,7 @@ import java.time.ZonedDateTime;
 @NamedQueries({
   @NamedQuery(name = "getEntityByToken", query = "SELECT u FROM CustomerAuthEntity u WHERE u.accessToken=:accessToken")
 })
-public class CustomerAuthEntity extends CustomerEntity{
+public class CustomerAuthEntity {
   @Id
   @Column(name = "id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,7 +9,8 @@ import java.util.Date;
 @Entity
 @Table(name = "orders")
 @NamedQueries({
-        @NamedQuery(name = "getOrdersByCustomer", query = "select o from OrderEntity o where o.customer = :customer")
+        @NamedQuery(name = "getOrdersByCustomer", query = "select o from OrderEntity o where o.customer = :customer"),
+        @NamedQuery(name = "getOrdersByRestaurant", query = "select o from OrderEntity o where o.restaurant = :restaurant")
 })
 public class OrderEntity implements Serializable {
 
@@ -52,18 +53,25 @@ public class OrderEntity implements Serializable {
     @JoinColumn(name = "PAYMENT_ID")
     private PaymentEntity payment;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "RESTAURANT_ID")
+    @NotNull
+    private RestaurantEntity restaurant;
+
     public OrderEntity() {
 
     }
 
-    public OrderEntity(String uuid, Double bill, CouponEntity couponEntity, Double discount, Date orderDate, CustomerEntity customerEntity, AddressEntity addressEntity) {
+    public OrderEntity(String uuid, Double bill, CouponEntity couponEntity, Double discount, Date orderDate, PaymentEntity paymentEntity, CustomerEntity customerEntity, AddressEntity addressEntity, RestaurantEntity restaurantEntity) {
         this.uuid = uuid;
         this.bill = bill;
         this.coupon = couponEntity;
         this.discount = discount;
         this.date = orderDate;
+        this.payment = paymentEntity;
         this.customer = customerEntity;
         this.address = addressEntity;
+        this.restaurant = restaurantEntity;
     }
 
     public Integer getId() {
@@ -114,7 +122,6 @@ public class OrderEntity implements Serializable {
         this.date = date;
     }
 
-
     public CustomerEntity getCustomer() {
         return customer;
     }
@@ -137,5 +144,13 @@ public class OrderEntity implements Serializable {
 
     public void setPayment(PaymentEntity payment) {
         this.payment = payment;
+    }
+
+    public RestaurantEntity getRestaurant() {
+        return restaurant;
+    }
+
+    public void setRestaurant(RestaurantEntity restaurant) {
+        this.restaurant = restaurant;
     }
 }

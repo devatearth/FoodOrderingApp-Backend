@@ -26,6 +26,10 @@ public class OrderItemEntity implements Serializable {
     @NotNull
     private OrderEntity order;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ITEM_ID")
+    @NotNull
+    private ItemEntity item;
 
     @Column(name = "QUANTITY")
     @NotNull
@@ -51,7 +55,6 @@ public class OrderItemEntity implements Serializable {
         this.order = order;
     }
 
-
     public Integer getQuantity() {
         return quantity;
     }
@@ -66,5 +69,13 @@ public class OrderItemEntity implements Serializable {
 
     public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public ItemEntity getItem() {
+        return item;
+    }
+
+    public void setItem(ItemEntity item) {
+        this.item = item;
     }
 }
