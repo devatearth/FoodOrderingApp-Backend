@@ -1,10 +1,7 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
 import com.upgrad.FoodOrderingApp.api.model.*;
-import com.upgrad.FoodOrderingApp.service.businness.AddressService;
-import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
-import com.upgrad.FoodOrderingApp.service.businness.OrderService;
-import com.upgrad.FoodOrderingApp.service.businness.PaymentService;
+import com.upgrad.FoodOrderingApp.service.businness.*;
 import com.upgrad.FoodOrderingApp.service.entity.*;
 import com.upgrad.FoodOrderingApp.service.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +29,12 @@ public class OrderController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private RestaurantService restaurantService;
+
+    @Autowired
+    private ItemService itemService;
 
     //getCouponByCouponName method to get the details of a coupon.
     @RequestMapping(
@@ -81,6 +84,7 @@ public class OrderController {
 
             //validate the access token in the header to proceed
             CustomerAuthEntity entity = customerService.validateAccessToken(jwt);
+
             //Calls getOrdersByCustomers of orderService to get all the past orders of the customer.
             List<OrderEntity> ordersEntities = orderService.getOrdersByCustomers(entity.getUuid());
 
@@ -95,11 +99,12 @@ public class OrderController {
 
                     List<ItemQuantityResponse> itemQuantityResponseList = new LinkedList<>();
                     orderItemEntities.forEach(orderItemEntity -> {
-                        ItemQuantityResponseItem itemQuantityResponseItem = new ItemQuantityResponseItem();
-                        //.itemName(orderItemEntity.getItem().getItemName())
-                        //.itemPrice(orderItemEntity.getItem().getPrice())
-                        //.id(UUID.fromString(orderItemEntity.getItem().getUuid()))
-                        //.type(ItemQuantityResponseItem.TypeEnum.valueOf(orderItemEntity.getItem().getType().getValue()));
+                        ItemQuantityResponseItem itemQuantityResponseItem = new ItemQuantityResponseItem()
+                        .itemName(orderItemEntity.getItem().getItemName())
+                        .itemPrice(orderItemEntity.getItem().getPrice())
+                        .id(UUID.fromString(String.valueOf(orderItemEntity.getItem().getUuid())))
+                        .type(ItemQuantityResponseItem.TypeEnum.valueOf(orderItemEntity.getItem().getType()/*.getValue()*/));
+
                         //Creating ItemQuantityResponse which will be added to the list
                         ItemQuantityResponse itemQuantityResponse = new ItemQuantityResponse()
                                 .item(itemQuantityResponseItem).quantity(orderItemEntity.getQuantity())
@@ -163,7 +168,7 @@ public class OrderController {
             orderEntity.setUuid(UUID.randomUUID().toString());
             orderEntity.setBill(saveOrderRequest.getBill().doubleValue());
             orderEntity.setDate(new Date());
-            orderEntity.setCustomer(entity);
+            //orderEntity.setCustomer(entity);
             String couponUuid = saveOrderRequest.getCouponId().toString();
             if (couponUuid != null) {
                 CouponEntity couponEntity = orderService.getCouponByCouponId(couponUuid);
@@ -188,13 +193,13 @@ public class OrderController {
 
             String addressUuid = saveOrderRequest.getAddressId();
 
-        /*AddressEntity addressEntity = addressService.getAddressByUuid(addressUuid, entity);
-        orderEntity.setAddress(addressEntity);*/
+            /*AddressEntity addressEntity = addressService.getAddressByUuid(addressUuid, entity);
+            orderEntity.setAddress(addressEntity);*/
 
             String restaurantUuid = saveOrderRequest.getRestaurantId().toString();
 
-        /*RestaurantEntity restaurantEntity = restaurantService.restaurantByUUID(restaurantUuid);
-        orderEntity.setRestaurant(restaurantEntity);*/
+            RestaurantEntity restaurantEntity = restaurantService.restaurantByUUID(restaurantUuid);
+            orderEntity.setRestaurant(restaurantEntity);
 
             List<ItemQuantity> itemList = saveOrderRequest.getItemQuantities();
 
@@ -202,16 +207,16 @@ public class OrderController {
 
             OrderEntity savedOrderEntity = orderService.saveOrder(orderEntity);
 
-        /*for(ItemQuantity itemQuantity: itemList) {
-            OrderItemEntity orderedItem = new OrderItemEntity();
-            ItemEntity itemEntity = itemService.getItemByUuid(itemQuantity.getItemId().toString());
-            orderedItem.setItem(itemEntity);
-            orderedItem.setOrder(savedOrderEntity);
-            orderedItem.setQuantity(itemQuantity.getQuantity());
-            orderedItem.setPrice(itemQuantity.getPrice());
-            orderItemEntityList.add(orderedItem);
-            orderService.saveOrderItem(orderedItem);
-        }*/
+            for(ItemQuantity itemQuantity: itemList) {
+                OrderItemEntity orderedItem = new OrderItemEntity();
+                /*ItemEntity itemEntity = itemService.getItemByUuid(itemQuantity.getItemId().toString());
+                orderedItem.setItem(itemEntity);*/
+                orderedItem.setOrder(savedOrderEntity);
+                orderedItem.setQuantity(itemQuantity.getQuantity());
+                orderedItem.setPrice(itemQuantity.getPrice());
+                orderItemEntityList.add(orderedItem);
+                orderService.saveOrderItem(orderedItem);
+            }
 
             //Creating the SaveOrderResponse for the endpoint containing UUID and success message.
             SaveOrderResponse saveOrderResponse = new SaveOrderResponse().id(savedOrderEntity.getUuid())

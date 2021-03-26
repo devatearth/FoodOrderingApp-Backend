@@ -21,7 +21,7 @@ public class CustomerDao {
 
   /* checks to see if a customer entity is there based on contact number and returns it*/
   public CustomerEntity getUserByContactNumber(String contactNumber) {
-    System.out.println(">_ checking to see if user is already existing or not...");
+    System.out.println(">_ 1. checking to see if user is already existing or not...");
     try {
       return this.entityManager.createNamedQuery("getUserByContactNumber", CustomerEntity.class)
              .setParameter("contactNumber", contactNumber).getSingleResult();
@@ -33,7 +33,7 @@ public class CustomerDao {
 
   /* checks to see if a customer entity is there based on a customer id and returns it */
   public CustomerEntity getCustomerEntityById(int customerId) {
-    System.out.println(">_ checking to see if user is already existing or not...");
+    System.out.println(">_ 2. checking to see if user is already existing or not...");
     try {
       return this.entityManager.createNamedQuery("getUserByCustomerId", CustomerEntity.class)
              .setParameter("id", customerId).getSingleResult();
@@ -74,6 +74,7 @@ public class CustomerDao {
 
   //To get customer details by Uuid
   public CustomerEntity getCustomerByUuid(String customerUuid) {
+    System.out.println(">_ Vetri Code");
     try {
       CustomerEntity customer = entityManager.createNamedQuery("userByUuid", CustomerEntity.class).setParameter("uuid", customerUuid).getSingleResult();
       return customer;
