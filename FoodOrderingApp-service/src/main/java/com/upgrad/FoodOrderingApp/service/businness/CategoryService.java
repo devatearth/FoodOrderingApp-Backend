@@ -43,4 +43,20 @@ public class CategoryService {
         return categoryEntities;
     }
 
+    public List<CategoryEntity> getAllCategories() {
+
+        //Calls all getCategories
+        List<CategoryEntity> categoryEntities = restaurantCategoryDao.getAllCategories();
+        return categoryEntities;
+    }
+
+    public String getCategoryByID(String categoryID) throws CategoryNotFoundException {
+        if(categoryID==""){
+            throw new CategoryNotFoundException("CNF-001","Category id field should not be empty");
+        }
+        if(categoryDao.getCategoryByUuid(categoryID) == null){
+            throw new CategoryNotFoundException("CNF-002","No category by this id");
+        }
+        return "hello";
+    }
 }

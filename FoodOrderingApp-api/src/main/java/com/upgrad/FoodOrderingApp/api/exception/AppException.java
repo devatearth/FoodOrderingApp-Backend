@@ -72,4 +72,13 @@ public class AppException {
     errorMap.put("message", exception.getErrorMessage());
     return new ResponseEntity(errorMap, HttpStatus.NOT_FOUND);
   }
+
+  /* category not found */
+  @ExceptionHandler(CategoryNotFoundException.class)
+  public ResponseEntity<Map<String, Object>> categoryNotFound(CategoryNotFoundException exception, WebRequest request) {
+    Map errorMap = new HashMap();
+    errorMap.put("code", exception.getCode());
+    errorMap.put("message", exception.getErrorMessage());
+    return new ResponseEntity(errorMap, HttpStatus.NOT_FOUND);
+  }
 }
