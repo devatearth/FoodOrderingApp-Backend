@@ -27,7 +27,7 @@ public class ItemController {
     @Autowired
     private ItemService itemService;
 
-    @RequestMapping(method = RequestMethod.GET, path = "/question/edit/{restaurant_id}",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/item/restaurant/{restaurant_id}",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<List<ItemList>> getRestaurantBy_uuid(@PathVariable("restaurant_id") final String restaurant_uuid) throws RestaurantNotFoundException {
         List<ItemEntity> itemEntities = itemService.GetTop5Items(restaurant_uuid);
         ItemEntity itemEntity;

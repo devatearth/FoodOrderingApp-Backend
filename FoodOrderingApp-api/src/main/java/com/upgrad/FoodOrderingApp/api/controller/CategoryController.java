@@ -1,8 +1,12 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
+import com.upgrad.FoodOrderingApp.api.model.CategoryDetailsResponse;
 import com.upgrad.FoodOrderingApp.api.model.CategoryListResponse;
+import com.upgrad.FoodOrderingApp.api.model.ItemList;
 import com.upgrad.FoodOrderingApp.service.businness.CategoryService;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
+import com.upgrad.FoodOrderingApp.service.entity.CategoryItemEntity;
+import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,7 @@ public class CategoryController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/category", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<List<CategoryListResponse>> getCategories() {
+        System.out.println("Invoked getCategories");
         List<CategoryEntity> categoryEntities = categoryService.getAllCategories();
         List<CategoryListResponse> allCategoryResponse = new ArrayList<>();
         CategoryEntity categoryEntitity;
@@ -39,7 +44,24 @@ public class CategoryController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/category/{category_id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getCategoriesByID(@PathVariable(value = "category_id") final String categoryId) throws CategoryNotFoundException {
-        return categoryService.getCategoryByID(categoryId);
+    public ResponseEntity<CategoryDetailsResponse> getCategoriesByID(@PathVariable(value = "category_id") final String categoryId) throws CategoryNotFoundException {
+                List<CategoryItemEntity> categoryItemEntities = categoryService.getCategoryByID(categoryId);
+        CategoryDetailsResponse categoryDetailsResponse = new CategoryDetailsResponse();
+        categoryItemEntities.forEach(category->{
+            categoryDetailsResponse.setId(UUID.fromString(categoryId));
+            categoryDetailsResponse.setCategoryName(category.getCategoryId().getCategoryName());
+            ItemList itemList =  new ItemList();
+            itemList.setItemName(category.getItemId().getItemName());
+            if(category.getItemId().getType() == "0") {
+                itemList.setItemType(ItemList.ItemTypeEnum.VEG);
+            }else if(category.getItemId().getType() == "1"){
+                itemList.setItemType(ItemList.ItemTypeEnum.NON_VEG);
+            }
+            itemList.setId(category.getItemId().getUuid());
+            itemList.setPrice(category.getItemId().getPrice());
+            categoryDetailsResponse.addItemListItem(itemList);
+
+        });
+        return new ResponseEntity<CategoryDetailsResponse>(categoryDetailsResponse, HttpStatus.OK);
     }
 }

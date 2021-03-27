@@ -1,9 +1,11 @@
 package com.upgrad.FoodOrderingApp.service.businness;
 
 import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;
+import com.upgrad.FoodOrderingApp.service.dao.CategoryItemDao;
 import com.upgrad.FoodOrderingApp.service.dao.RestaurantCategoryDao;
 import com.upgrad.FoodOrderingApp.service.dao.RestaurantDao;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
+import com.upgrad.FoodOrderingApp.service.entity.CategoryItemEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantCategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
@@ -26,6 +28,9 @@ public class CategoryService {
 
     @Autowired
     private CategoryDao categoryDao;
+
+    @Autowired
+    private CategoryItemDao categoryItemDao;
 
     public List<CategoryEntity> getCategoriesByRestaurant(String restaurantUuid) {
 
@@ -50,13 +55,18 @@ public class CategoryService {
         return categoryEntities;
     }
 
-    public String getCategoryByID(String categoryID) throws CategoryNotFoundException {
+    public List<CategoryItemEntity> getCategoryByID(String categoryID) throws CategoryNotFoundException {
         if(categoryID==""){
             throw new CategoryNotFoundException("CNF-001","Category id field should not be empty");
         }
-        if(categoryDao.getCategoryByUuid(categoryID) == null){
+        CategoryEntity currentCategory = categoryDao.getCategoryByUuid(categoryID);
+        if(currentCategory == null){
             throw new CategoryNotFoundException("CNF-002","No category by this id");
         }
-        return "hello";
+        System.out.println("Sendingresponse");
+        List<CategoryItemEntity> categoryItemEntities = new LinkedList<>();
+        categoryItemEntities = categoryItemDao.getItemsByCategory(currentCategory);
+        return categoryItemEntities;
+
     }
 }
