@@ -4,6 +4,19 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.UUID;
+@NamedNativeQueries({
+        // Using native query as named queries do not support LIMIT in nested statements.
+        @NamedNativeQuery(
+                name = "topFivePopularItemsByRestaurant",
+                query =
+                        "select * from item where id in "
+                                + "(select ITEM_ID from order_item where ORDER_ID in "
+                                + "(select ID from orders where RESTAURANT_ID = ? ) "
+                                + "group by order_item.ITEM_ID "
+                                + "order by (count(order_item.ORDER_ID)) "
+                                + "desc LIMIT 5)",
+                resultClass = ItemEntity.class)
+})
 
 @Entity
 @Table(name = "item")

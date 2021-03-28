@@ -1,9 +1,6 @@
 package com.upgrad.FoodOrderingApp.service.businness;
 
-import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;
-import com.upgrad.FoodOrderingApp.service.dao.CategoryItemDao;
-import com.upgrad.FoodOrderingApp.service.dao.RestaurantDao;
-import com.upgrad.FoodOrderingApp.service.dao.RestaurantItemDao;
+import com.upgrad.FoodOrderingApp.service.dao.*;
 import com.upgrad.FoodOrderingApp.service.entity.*;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +24,13 @@ public class ItemService {
     @Autowired
     private CategoryItemDao categoryItemDao;
 
+    @Autowired
+    private ItemDao itemDao;
+
     public List<ItemEntity> GetTop5Items(String restuarantUuiD) throws RestaurantNotFoundException {
-       if(restaurantDao.restaurantByUUID(restuarantUuiD) == null){
-           throw new RestaurantNotFoundException("RNF-001","No restaurant by this id");
-       }
-        return null;
+        //Calls getRestaurantByUuid of restaurantDao to get the  RestaurantEntity
+        RestaurantEntity restaurantEntity = restaurantDao.restaurantByUUID(restuarantUuiD);
+        return itemDao.getOrdersByRestaurant(restaurantEntity);
     }
 
     /* This method is to get Items By Category And Restaurant and returns list of ItemEntity it takes restaurantUuid & categoryUuid as input.

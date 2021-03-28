@@ -30,14 +30,22 @@ public class ItemController {
     @RequestMapping(method = RequestMethod.GET, path = "/item/restaurant/{restaurant_id}",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<List<ItemList>> getRestaurantBy_uuid(@PathVariable("restaurant_id") final String restaurant_uuid) throws RestaurantNotFoundException {
         List<ItemEntity> itemEntities = itemService.GetTop5Items(restaurant_uuid);
-        ItemEntity itemEntity;
         List<ItemList> top5timeResponse = new ArrayList<>();
-        for (int i = 0; i < itemEntities.size(); i++) {
-            itemEntity = itemEntities.get(i);
-            ItemList item = new ItemList();
-            item.setId(itemEntity.getUuid());
-            item.setItemName(itemEntity.getItemName());
-            top5timeResponse.add(item);
+        System.out.println(itemEntities.size());
+        for (ItemEntity entity : itemEntities) {
+            System.out.println(entity.getItemName());
+            ItemList itemList = new ItemList();
+            itemList.setId(entity.getUuid());
+            itemList.setItemName(entity.getItemName());
+
+            ItemList.ItemTypeEnum itemTypeEnum =
+                    (Integer.valueOf(entity.getType().toString()) == 0)
+                            ? ItemList.ItemTypeEnum.VEG
+                            : ItemList.ItemTypeEnum.NON_VEG;
+
+            itemList.setItemType(itemTypeEnum);
+            itemList.setPrice(entity.getPrice());
+            top5timeResponse.add(itemList);
         }
         return new ResponseEntity<>(top5timeResponse, HttpStatus.OK);
     }

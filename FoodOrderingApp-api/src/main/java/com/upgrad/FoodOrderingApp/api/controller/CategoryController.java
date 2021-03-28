@@ -45,18 +45,16 @@ public class CategoryController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/category/{category_id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<CategoryDetailsResponse> getCategoriesByID(@PathVariable(value = "category_id") final String categoryId) throws CategoryNotFoundException {
-                List<CategoryItemEntity> categoryItemEntities = categoryService.getCategoryByID(categoryId);
+        List<CategoryItemEntity> categoryItemEntities = categoryService.getCategoryByID(categoryId);
         CategoryDetailsResponse categoryDetailsResponse = new CategoryDetailsResponse();
-        categoryItemEntities.forEach(category->{
+        categoryItemEntities.forEach(category -> {
             categoryDetailsResponse.setId(UUID.fromString(categoryId));
             categoryDetailsResponse.setCategoryName(category.getCategoryId().getCategoryName());
-            ItemList itemList =  new ItemList();
+            ItemList itemList = new ItemList();
             itemList.setItemName(category.getItemId().getItemName());
-            if(category.getItemId().getType() == "0") {
-                itemList.setItemType(ItemList.ItemTypeEnum.VEG);
-            }else if(category.getItemId().getType() == "1"){
-                itemList.setItemType(ItemList.ItemTypeEnum.NON_VEG);
-            }
+            itemList.setItemType((Integer.valueOf(category.getItemId().getType().toString()) == 0)
+                    ? ItemList.ItemTypeEnum.VEG
+                    : ItemList.ItemTypeEnum.NON_VEG);
             itemList.setId(category.getItemId().getUuid());
             itemList.setPrice(category.getItemId().getPrice());
             categoryDetailsResponse.addItemListItem(itemList);
