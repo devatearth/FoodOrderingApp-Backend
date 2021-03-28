@@ -47,6 +47,14 @@ public class CategoryService {
         });
         return categoryEntities;
     }
+    /* This method is to get All Categories Ordered By Name and returns list of CategoryEntity
+       If error throws exception with error code and error message.
+       */
+    public List<CategoryEntity> getAllCategoriesOrderedByName() {
+        //Calls getAllCategoriesOrderedByName of categoryDao to get list of CategoryEntity
+        List<CategoryEntity> categoryEntities = categoryDao.getAllCategoriesOrderedByName();
+        return categoryEntities;
+    }
 
     public List<CategoryEntity> getAllCategories() {
 
@@ -55,18 +63,18 @@ public class CategoryService {
         return categoryEntities;
     }
 
-    public List<CategoryItemEntity> getCategoryById(String categoryID) throws CategoryNotFoundException {
-        if(categoryID==""){
-            throw new CategoryNotFoundException("CNF-001","Category id field should not be empty");
+    public CategoryEntity getCategoryById(String categoryUuid) throws CategoryNotFoundException {
+        if (categoryUuid == null || categoryUuid == "") { //Checking for categoryUuid to be null or empty to throw exception.
+            throw new CategoryNotFoundException("CNF-001", "Category id field should not be empty");
         }
-        CategoryEntity currentCategory = categoryDao.getCategoryByUuid(categoryID);
-        if(currentCategory == null){
-            throw new CategoryNotFoundException("CNF-002","No category by this id");
-        }
-        System.out.println("Sendingresponse");
-        List<CategoryItemEntity> categoryItemEntities = new LinkedList<>();
-        categoryItemEntities = categoryItemDao.getItemsByCategory(currentCategory);
-        return categoryItemEntities;
 
+        //Calls getCategoryByUuid of categoryDao to get CategoryEntity
+        CategoryEntity categoryEntity = categoryDao.getCategoryByUuid(categoryUuid);
+
+        if (categoryEntity == null) { //Checking for categoryEntity to be null or empty to throw exception.
+            throw new CategoryNotFoundException("CNF-002", "No category by this id");
+        }
+
+        return categoryEntity;
     }
 }
