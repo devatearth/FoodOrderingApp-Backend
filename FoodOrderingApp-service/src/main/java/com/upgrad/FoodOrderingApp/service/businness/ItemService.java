@@ -27,9 +27,8 @@ public class ItemService {
     @Autowired
     private ItemDao itemDao;
 
-    public List<ItemEntity> GetTop5Items(String restuarantUuiD) throws RestaurantNotFoundException {
+    public List<ItemEntity> getItemsByPopularity(RestaurantEntity restaurantEntity) throws RestaurantNotFoundException {
         //Calls getRestaurantByUuid of restaurantDao to get the  RestaurantEntity
-        RestaurantEntity restaurantEntity = restaurantDao.restaurantByUUID(restuarantUuiD);
         return itemDao.getOrdersByRestaurant(restaurantEntity);
     }
 

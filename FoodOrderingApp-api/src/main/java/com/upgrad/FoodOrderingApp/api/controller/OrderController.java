@@ -103,7 +103,7 @@ public class OrderController {
                         .itemName(orderItemEntity.getItem().getItemName())
                         .itemPrice(orderItemEntity.getItem().getPrice())
                         .id(UUID.fromString(String.valueOf(orderItemEntity.getItem().getUuid())))
-                        .type(ItemQuantityResponseItem.TypeEnum.valueOf(orderItemEntity.getItem().getType()/*.getValue()*/));
+                        .type(ItemQuantityResponseItem.TypeEnum.valueOf(orderItemEntity.getItem().getType().getValue()));
 
                         //Creating ItemQuantityResponse which will be added to the list
                         ItemQuantityResponse itemQuantityResponse = new ItemQuantityResponse()
