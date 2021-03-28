@@ -45,7 +45,7 @@ public class CategoryController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/category/{category_id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<CategoryDetailsResponse> getCategoriesByID(@PathVariable(value = "category_id") final String categoryId) throws CategoryNotFoundException {
-        List<CategoryItemEntity> categoryItemEntities = categoryService.getCategoryByID(categoryId);
+        List<CategoryItemEntity> categoryItemEntities = categoryService.getCategoryById(categoryId);
         CategoryDetailsResponse categoryDetailsResponse = new CategoryDetailsResponse();
         categoryItemEntities.forEach(category -> {
             categoryDetailsResponse.setId(UUID.fromString(categoryId));
@@ -55,7 +55,7 @@ public class CategoryController {
             itemList.setItemType((Integer.valueOf(category.getItemId().getType().toString()) == 0)
                     ? ItemList.ItemTypeEnum.VEG
                     : ItemList.ItemTypeEnum.NON_VEG);
-            itemList.setId(category.getItemId().getUuid());
+            itemList.setId(UUID.fromString(category.getItemId().getUuid()));
             itemList.setPrice(category.getItemId().getPrice());
             categoryDetailsResponse.addItemListItem(itemList);
 

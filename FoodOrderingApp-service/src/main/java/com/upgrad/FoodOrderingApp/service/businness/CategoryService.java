@@ -55,7 +55,7 @@ public class CategoryService {
         return categoryEntities;
     }
 
-    public List<CategoryItemEntity> getCategoryByID(String categoryID) throws CategoryNotFoundException {
+    public List<CategoryItemEntity> getCategoryById(String categoryID) throws CategoryNotFoundException {
         if(categoryID==""){
             throw new CategoryNotFoundException("CNF-001","Category id field should not be empty");
         }

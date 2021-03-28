@@ -35,14 +35,12 @@ public class ItemController {
         for (ItemEntity entity : itemEntities) {
             System.out.println(entity.getItemName());
             ItemList itemList = new ItemList();
-            itemList.setId(entity.getUuid());
+            itemList.setId(UUID.fromString(entity.getUuid()));
             itemList.setItemName(entity.getItemName());
-
             ItemList.ItemTypeEnum itemTypeEnum =
                     (Integer.valueOf(entity.getType().toString()) == 0)
                             ? ItemList.ItemTypeEnum.VEG
                             : ItemList.ItemTypeEnum.NON_VEG;
-
             itemList.setItemType(itemTypeEnum);
             itemList.setPrice(entity.getPrice());
             top5timeResponse.add(itemList);
